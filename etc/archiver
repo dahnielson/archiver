@@ -1,0 +1,12 @@
+# MySQL settings
+$MYSQL_USER=
+$MYSQL_PASSWD=
+$MYSQL_DB=
+$MYSQL_BINLOG_DIR=/var/lib/mysql
+$MYSQL_BINLOG_PREFIX=mysqld-bin
+
+# Amazon S3 settings
+$S3_BUCKET=
+
+# Archiver settings
+$TMP_DIR=/tmp

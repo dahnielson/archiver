@@ -1,0 +1,22 @@
+#!/bin/bash
+
+. "$HOME/etc/archiver"
+
+DUMPFILE=$TMP_DIR/all-databases-$(date +%Y%m%d%H%M%S).sql.bz2
+
+mysqldump \
+    --quick \
+    --single-transaction \
+    --create-options \
+    --user=$MYSQL_USER \
+    --password=$MYSQL_PASSWD \
+    --flush-logs \
+    --master-data=2 \
+    --delete-master-logs \
+    --all-databases \
+    | bzip2 > $DUMPFILE
+
+s3cmd del --recursive s3://$S3_BUCKET/bin/
+s3cmd put -f $DUMPFILE s3://$S3_BUCKET/sql/
+
+rm -rf $DUMPFILE 

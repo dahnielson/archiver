@@ -1,0 +1,28 @@
+#!/bin/bash
+
+. "$HOME/etc/archiver"
+
+BINLOG_TMP=$TMP_DIR/archiver-binlog-$(date +%Y%m%d%H%M%S).tmp
+
+mysql \
+    --user=$MYSQL_USER \
+    --password=$MYSQL_PASSWD \
+    -e "FLUSH LOGS"
+
+shopt -s nullglob
+files=$MYSQL_BINLOG_DIR/$MYSQL_BINLOG_PREFIX.[0-9]*
+for f in $files;
+do
+    echo "$f" >> $BINLOG_TMP
+done
+for f in $(head -n -1 $BINLOG_TMP);
+do
+    s3cmd put -f $f s3://$S3_BUCKET/bin/
+done
+lastlog=$(tail -n 1 $BINLOG_TMP)
+rm -rf $BINLOG_TMP
+
+mysql \
+    --user=$MYSQL_USER \
+    --password=$MYSQL_PASSWD \
+    -e "PURGE MASTER LOGS TO '$lastlog'"
